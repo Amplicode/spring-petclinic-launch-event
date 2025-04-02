@@ -22,7 +22,6 @@ ext.webjarsBootstrapVersion = "5.3.3"
 
 dependencies {
   implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
-  implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
   implementation 'org.springframework.boot:spring-boot-starter-web'
   implementation 'org.springframework.boot:spring-boot-starter-validation'
   implementation 'jakarta.xml.bind:jakarta.xml.bind-api'

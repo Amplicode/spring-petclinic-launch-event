@@ -19,7 +19,6 @@ import org.springframework.data.relational.core.mapping.MappedCollection;
 import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.samples.petclinic.model.Person;
 
-import java.util.HashSet;
 import java.util.Set;
 
 /**

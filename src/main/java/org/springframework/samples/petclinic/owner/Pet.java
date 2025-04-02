@@ -45,17 +45,6 @@ public class Pet extends NamedEntity {
 	@Column("type_id")
 	private AggregateReference<PetType, Integer> type;
 
-	@MappedCollection(idColumn = "pet_id")
-	private Set<Visit> visits = new LinkedHashSet<>();
-
-	public Set<Visit> getVisits() {
-		return visits;
-	}
-
-	public void setVisits(Set<Visit> visits) {
-		this.visits = visits;
-	}
-
 	public void setBirthDate(LocalDate birthDate) {
 		this.birthDate = birthDate;
 	}

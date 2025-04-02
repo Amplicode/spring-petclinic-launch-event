@@ -16,7 +16,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/rest/petTypes")
-public class PetTypeResource {
+public class PetTypeController {
 
 	private final PetTypeRepository petTypeRepository;
 
@@ -24,9 +24,9 @@ public class PetTypeResource {
 
 	private final ObjectMapper objectMapper;
 
-	public PetTypeResource(PetTypeRepository petTypeRepository,
-						   PetTypeMapper petTypeMapper,
-						   ObjectMapper objectMapper) {
+	public PetTypeController(PetTypeRepository petTypeRepository,
+							 PetTypeMapper petTypeMapper,
+							 ObjectMapper objectMapper) {
 		this.petTypeRepository = petTypeRepository;
 		this.petTypeMapper = petTypeMapper;
 		this.objectMapper = objectMapper;

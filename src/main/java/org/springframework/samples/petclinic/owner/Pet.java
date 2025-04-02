@@ -48,6 +48,14 @@ public class Pet extends NamedEntity {
 	@MappedCollection(idColumn = "pet_id")
 	private Set<Visit> visits = new LinkedHashSet<>();
 
+	public Set<Visit> getVisits() {
+		return visits;
+	}
+
+	public void setVisits(Set<Visit> visits) {
+		this.visits = visits;
+	}
+
 	public void setBirthDate(LocalDate birthDate) {
 		this.birthDate = birthDate;
 	}
@@ -64,11 +72,4 @@ public class Pet extends NamedEntity {
 		this.type = type;
 	}
 
-	public Collection<Visit> getVisits() {
-		return this.visits;
-	}
-
-	public void addVisit(Visit visit) {
-		getVisits().add(visit);
-	}
 }

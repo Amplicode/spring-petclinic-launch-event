@@ -159,7 +159,7 @@ public class Owner extends Person {
 
 		Assert.notNull(pet, "Invalid Pet identifier!");
 
-		pet.addVisit(visit);
+		//pet.addVisit(visit);
 	}
 
 }

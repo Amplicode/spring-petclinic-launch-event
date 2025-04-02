@@ -21,4 +21,6 @@ GET("http://localhost:8080/rest/vets/{id}") {
     assertThat(vet.firstName).isEqualTo("Linda")
 }
 
-
+GET("http://localhost:8080/rest/vets/byFirstName/{firstName}") {
+    pathParam("firstName", "Linda")
+}

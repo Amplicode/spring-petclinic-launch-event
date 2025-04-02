@@ -15,23 +15,21 @@
  */
 package org.springframework.samples.petclinic.owner;
 
-import java.time.LocalDate;
-import java.util.Collection;
-
+import jakarta.validation.Valid;
+import org.springframework.samples.petclinic.type.PetTypeDto;
+import org.springframework.samples.petclinic.type.PetTypeMapper;
+import org.springframework.samples.petclinic.type.PetTypeRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.InitBinder;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.Objects;
 
 /**
  * @author Juergen Hoeller
@@ -45,39 +43,44 @@ class PetController {
 	private static final String VIEWS_PETS_CREATE_OR_UPDATE_FORM = "pets/createOrUpdatePetForm";
 
 	private final OwnerRepository owners;
+	private final PetTypeRepository petTypes;
+	private final PetTypeMapper petTypeMapper;
+	private final OwnerMapper ownerMapper;
 
-	public PetController(OwnerRepository owners) {
+	public PetController(OwnerRepository owners, PetTypeRepository petTypes, PetTypeMapper petTypeMapper, OwnerMapper ownerMapper) {
 		this.owners = owners;
+		this.petTypes = petTypes;
+		this.petTypeMapper = petTypeMapper;
+		this.ownerMapper = ownerMapper;
 	}
 
 	@ModelAttribute("types")
-	public Collection<PetType> populatePetTypes() {
-		return this.owners.findPetTypes();
+	public Collection<PetTypeDto> populatePetTypes() {
+		return this.petTypes.findAllByOrderByNameAsc().stream()
+			.map(petTypeMapper::toPetTypeDto)
+			.toList();
 	}
 
 	@ModelAttribute("owner")
-	public Owner findOwner(@PathVariable("ownerId") int ownerId) {
-
-		Owner owner = this.owners.findByIdWithPets(ownerId);
-		if (owner == null) {
-			throw new IllegalArgumentException("Owner ID not found: " + ownerId);
-		}
-		return owner;
+	public OwnerDto findOwner(@PathVariable("ownerId") int ownerId) {
+		return this.owners.findById(ownerId).map(ownerMapper::toOwnerDto)
+			.orElseThrow(() -> new IllegalArgumentException("Owner ID not found: " + ownerId));
 	}
 
 	@ModelAttribute("pet")
-	public Pet findPet(@PathVariable("ownerId") int ownerId,
-			@PathVariable(name = "petId", required = false) Integer petId) {
+	public PetDto findPet(@PathVariable("ownerId") int ownerId,
+						  @PathVariable(name = "petId", required = false) Integer petId) {
 
 		if (petId == null) {
-			return new Pet();
+			return new PetDto();
 		}
 
-		Owner owner = this.owners.findByIdWithPets(ownerId);
-		if (owner == null) {
-			throw new IllegalArgumentException("Owner ID not found: " + ownerId);
+		Owner owner = this.owners.findById(ownerId).orElseThrow(() -> new IllegalArgumentException("Owner ID not found: " + ownerId));
+		Pet pet = owner.getPet(petId);
+		if (pet != null) {
+			return ownerMapper.toPetDto(pet);
 		}
-		return owner.getPet(petId);
+		return null;
 	}
 
 	@InitBinder("owner")
@@ -91,17 +94,17 @@ class PetController {
 	}
 
 	@GetMapping("/pets/new")
-	public String initCreationForm(Owner owner, ModelMap model) {
-		Pet pet = new Pet();
+	public String initCreationForm(OwnerDto owner, ModelMap model) {
+		PetDto pet = new PetDto();
 		owner.addPet(pet);
 		model.put("pet", pet);
 		return VIEWS_PETS_CREATE_OR_UPDATE_FORM;
 	}
 
 	@PostMapping("/pets/new")
-	public String processCreationForm(Owner owner, @Valid Pet pet, BindingResult result, ModelMap model,
-			RedirectAttributes redirectAttributes) {
-		if (StringUtils.hasText(pet.getName()) && pet.isNew() && owner.getPet(pet.getName(), true) != null) {
+	public String processCreationForm(OwnerDto owner, @Valid PetDto pet, BindingResult result, ModelMap model,
+									  RedirectAttributes redirectAttributes) {
+		if (StringUtils.hasText(pet.getName()) && pet.getId() == null && owner.getPet(pet.getName(), true) != null) {
 			result.rejectValue("name", "duplicate", "already exists");
 		}
 
@@ -116,29 +119,29 @@ class PetController {
 			return VIEWS_PETS_CREATE_OR_UPDATE_FORM;
 		}
 
-		this.owners.save(owner);
+		this.owners.save(ownerMapper.toEntity(owner));
 		redirectAttributes.addFlashAttribute("message", "New Pet has been Added");
 		return "redirect:/owners/{ownerId}";
 	}
 
 	@GetMapping("/pets/{petId}/edit")
-	public String initUpdateForm(Owner owner, @PathVariable("petId") int petId, ModelMap model,
-			RedirectAttributes redirectAttributes) {
-		Pet pet = owner.getPet(petId);
+	public String initUpdateForm(OwnerDto owner, @PathVariable("petId") int petId, ModelMap model,
+								 RedirectAttributes redirectAttributes) {
+		PetDto pet = owner.getPet(petId);
 		model.put("pet", pet);
 		return VIEWS_PETS_CREATE_OR_UPDATE_FORM;
 	}
 
 	@PostMapping("/pets/{petId}/edit")
-	public String processUpdateForm(@Valid Pet pet, BindingResult result, Owner owner, ModelMap model,
-			RedirectAttributes redirectAttributes) {
+	public String processUpdateForm(@Valid PetDto pet, BindingResult result, OwnerDto owner, ModelMap model,
+									RedirectAttributes redirectAttributes) {
 
 		String petName = pet.getName();
 
 		// checking if the pet name already exist for the owner
 		if (StringUtils.hasText(petName)) {
-			Pet existingPet = owner.getPet(petName.toLowerCase(), false);
-			if (existingPet != null && existingPet.getId() != pet.getId()) {
+			PetDto existingPet = owner.getPet(petName.toLowerCase(), false);
+			if (existingPet != null && !Objects.equals(existingPet.getId(), pet.getId())) {
 				result.rejectValue("name", "duplicate", "already exists");
 			}
 		}
@@ -154,7 +157,7 @@ class PetController {
 		}
 
 		owner.addPet(pet);
-		this.owners.save(owner);
+		this.owners.save(ownerMapper.toEntity(owner));
 		redirectAttributes.addFlashAttribute("message", "Pet details has been edited");
 		return "redirect:/owners/{ownerId}";
 	}

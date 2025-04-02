@@ -15,15 +15,13 @@
  */
 package org.springframework.samples.petclinic.owner;
 
-import java.time.LocalDate;
-
+import jakarta.validation.constraints.NotBlank;
+import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.data.relational.core.mapping.Table;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.samples.petclinic.model.BaseEntity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
+import java.time.LocalDate;
 
 /**
  * Simple JavaBean domain object representing a visit.
@@ -31,11 +29,10 @@ import jakarta.validation.constraints.NotBlank;
  * @author Ken Krebs
  * @author Dave Syer
  */
-@Entity
 @Table(name = "visits")
 public class Visit extends BaseEntity {
 
-	@Column(name = "visit_date")
+	@Column("visit_date")
 	@DateTimeFormat(pattern = "yyyy-MM-dd")
 	private LocalDate date;
 

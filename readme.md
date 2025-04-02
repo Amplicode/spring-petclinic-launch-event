@@ -31,6 +31,6 @@ GET("http://localhost:8080/rest/vets/byFirstName/{firstName}") {
     pathParam("firstName", "Linda")
 }
 ```
-* Показываем запрос выполнился и подгрузил нужные данные
+* Показываем что HTTP запрос выполнился и подгрузил нужные данные
 
 

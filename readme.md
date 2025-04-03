@@ -33,4 +33,28 @@ GET("http://localhost:8080/rest/vets/byFirstName/{firstName}") {
 ```
 * Показываем что HTTP запрос выполнился и подгрузил нужные данные
 
+# Создание сушности Visit из БД 
+* Показываем что в модели данных нет сущности Visit. Можно показать это в Amplicode Explorer дерево Persistence -> JDBC.
+* Показываем в JDBC connections что есть таблица Visit
+* Выделяем пакет owner и вызываем действие JDBC Tables from DB 
+* Выделяем таблицу visits и все поля таблицы.
+* Нажимаем в диалоге OK.
+* Показываем что сущность Visit сгенерировалась
+
+# Добавление связи Pet -> Visit через дизайнер 
+* Открываем сущность Pet
+* В дизайнере Amplicode выбираем Assotiation
+* Выбираем тип Vet
+* Collection type: Set
+* Нажимаем OK, смотрим что добавляется поле vets
+
+# Проверяем что загружаются данные по Visit через REST CRUD контроллер для Owner
+* Создаем CRUD контроллер для сущности Owner
+* Repository: OwnerRepository, DTO class: Owner, Controller class: OwnerController, 
+Request path: /rest  - /owners, Package: Owners
+* После создания контроллера OwnerController, создаем Http запрос для метода getAll
+* Перезапускаем приложение
+* Показываем что запрос по Owner подгружает данные по Visit
+   
+
 
